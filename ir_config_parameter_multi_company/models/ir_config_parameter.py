@@ -60,8 +60,7 @@ class IrConfigParameter(models.Model):
             self.ensure_one()  # it's not possible to update key on multiple records
             name = PROP_NAME % vals.get('key')
             prop = self._get_property(for_default=True)
-            prop.name = name
-
+            prop.write({'name': name})
         return res
 
     def _force_default(self, value):
@@ -170,6 +169,7 @@ class IrConfigParameter(models.Model):
 
     def _auto_init(self):
         cr = self.env.cr
+
         # rename "value" to "value_tmp"
         # to don't lose values, because during installation the column "value" is deleted
         cr.execute("ALTER TABLE ir_config_parameter RENAME COLUMN value TO value_tmp")
@@ -187,6 +187,7 @@ class IrConfigParameter(models.Model):
 
         for r in self.env['ir.config_parameter'].sudo().search([]):
             cr.execute("SELECT key,value FROM ir_config_parameter WHERE id = %s", (r.id, ))
+
             res = cr.dictfetchone()
             value = res.get('value')
             # value may be empty after migration from previous module version
